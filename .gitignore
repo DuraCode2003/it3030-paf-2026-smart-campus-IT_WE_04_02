@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+target/
+dist/
+build/
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Maven
+bin/
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# Others
+.github/
+# Note: Keep .github/ if you want to commit workflows/actions, but usually they are included.
+# Since it was in untracked, I'll let the user decide if they want to keep it.

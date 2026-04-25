@@ -16,6 +16,7 @@ import com.smartcampus.model.enums.UserRole;
 import com.smartcampus.repository.BookingRepository;
 import com.smartcampus.repository.ResourceRepository;
 import com.smartcampus.repository.UserRepository;
+import com.smartcampus.model.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ResourceRepository resourceRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     private final SmartMapper mapper;
 
     @Transactional(readOnly = true)
@@ -103,7 +105,18 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.APPROVED);
         booking.setAdminNote(request.getNote());
-        return mapper.toBookingResponse(bookingRepository.save(booking));
+        
+        Booking saved = bookingRepository.save(booking);
+        
+        notificationService.sendNotification(
+                saved.getUser(),
+                NotificationType.BOOKING_APPROVED,
+                "Booking Approved",
+                "Your booking for " + saved.getResource().getName() + " has been approved.",
+                saved.getId(), "BOOKING"
+        );
+        
+        return mapper.toBookingResponse(saved);
     }
 
     @Transactional
@@ -117,7 +130,18 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.REJECTED);
         booking.setAdminNote(request.getNote());
-        return mapper.toBookingResponse(bookingRepository.save(booking));
+        
+        Booking saved = bookingRepository.save(booking);
+        
+        notificationService.sendNotification(
+                saved.getUser(),
+                NotificationType.BOOKING_REJECTED,
+                "Booking Rejected",
+                "Your booking for " + saved.getResource().getName() + " was rejected. Reason: " + request.getNote(),
+                saved.getId(), "BOOKING"
+        );
+        
+        return mapper.toBookingResponse(saved);
     }
 
     @Transactional

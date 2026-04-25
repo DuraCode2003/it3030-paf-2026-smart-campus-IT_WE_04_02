@@ -68,4 +68,61 @@ public class SmartMapper {
                 .updatedAt(booking.getUpdatedAt())
                 .build();
     }
+
+    public TicketResponse toTicketResponse(IncidentTicket ticket) {
+        if (ticket == null) return null;
+        return TicketResponse.builder()
+                .id(ticket.getId())
+                .resourceId(ticket.getResource() != null ? ticket.getResource().getId() : null)
+                .resourceName(ticket.getResource() != null ? ticket.getResource().getName() : null)
+                .location(ticket.getLocation())
+                .category(ticket.getCategory())
+                .description(ticket.getDescription())
+                .priority(ticket.getPriority())
+                .status(ticket.getStatus())
+                .reportedBy(toUserResponse(ticket.getReportedBy()))
+                .assignedTo(toUserResponse(ticket.getAssignedTo()))
+                .rejectionReason(ticket.getRejectionReason())
+                .resolutionNotes(ticket.getResolutionNotes())
+                .attachments(ticket.getAttachments().stream()
+                        .map(this::toAttachmentResponse)
+                        .collect(Collectors.toList()))
+                .createdAt(ticket.getCreatedAt())
+                .updatedAt(ticket.getUpdatedAt())
+                .build();
+    }
+
+    public TicketResponse.AttachmentResponse toAttachmentResponse(TicketAttachment attachment) {
+        return TicketResponse.AttachmentResponse.builder()
+                .id(attachment.getId())
+                .fileUrl(attachment.getFileUrl())
+                .originalFilename(attachment.getOriginalFilename())
+                .uploadedAt(attachment.getUploadedAt())
+                .build();
+    }
+
+    public CommentResponse toCommentResponse(Comment comment) {
+        if (comment == null) return null;
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .author(toUserResponse(comment.getAuthor()))
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
+    }
+
+    public NotificationResponse toNotificationResponse(Notification notification) {
+        if (notification == null) return null;
+        return NotificationResponse.builder()
+                .id(notification.getId())
+                .type(notification.getType())
+                .title(notification.getTitle())
+                .message(notification.getMessage())
+                .referenceId(notification.getReferenceId())
+                .referenceType(notification.getReferenceType())
+                .isRead(notification.isRead())
+                .createdAt(notification.getCreatedAt())
+                .build();
+    }
 }

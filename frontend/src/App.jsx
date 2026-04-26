@@ -13,6 +13,7 @@ import { ROLES } from './data';
 // Public pages
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 // App pages
 import DashboardPage from './pages/DashboardPage';
@@ -71,6 +72,7 @@ export default function App() {
             {/* ── Public ─────────────────────────────────────────────────── */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
             {/* ── Protected (require auth + shared shell) ─────────────────  */}
             <Route

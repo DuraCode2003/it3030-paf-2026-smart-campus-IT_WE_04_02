@@ -10,19 +10,33 @@ import { cn } from '../utils/cn';
 import { useQuery } from '@tanstack/react-query';
 import { resourcesApi } from '../api';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { usePermissions } from '../hooks/usePermissions';
 
 export default function ResourcesPage() {
   const navigate = useNavigate();
   const [view, setView] = useState('grid');
+  const [filters, setFilters] = useState({
+    search: '',
+    type: '',
+    capacity: '',
+    status: ''
+  });
+
+  const { canViewResource } = usePermissions();
+
   const { data: apiResources, isLoading } = useQuery({
     queryKey: ['resources', filters],
     queryFn: () => resourcesApi.getAll(filters).then(res => res.data),
-    initialData: RESOURCES // Fallback to mock data if backend is down or not yet loaded
+    initialData: RESOURCES 
   });
 
   const displayResources = apiResources?.content || apiResources || [];
 
-  const filteredResources = displayResources.filter(r => {
+  // Filter 1: Role-based silent filtering
+  const visibleToRole = displayResources.filter(r => canViewResource(r));
+
+  // Filter 2: UI Search/Type/Status filtering
+  const filteredResources = visibleToRole.filter(r => {
     const matchesSearch = r.name.toLowerCase().includes(filters.search.toLowerCase()) || 
                          r.location.toLowerCase().includes(filters.search.toLowerCase());
     const matchesType = !filters.type || r.type === filters.type;
@@ -108,7 +122,9 @@ export default function ResourcesPage() {
       />
 
       {isLoading ? (
-        <LoadingSpinner text="Fetching resources..." />
+        <div className="h-64 flex items-center justify-center">
+           <LoadingSpinner text="Fetching resources..." />
+        </div>
       ) : filteredResources.length === 0 ? (
         <EmptyState 
           title="No resources found" 
@@ -147,6 +163,7 @@ export default function ResourcesPage() {
                     resource={r} 
                     view="list" 
                     onBook={() => navigate(`/bookings/new?resourceId=${r.id}`)}
+                    onClick={() => navigate(`/resources/${r.id}`)}
                   />
                 ))}
               </tbody>

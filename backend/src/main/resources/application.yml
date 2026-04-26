@@ -35,7 +35,7 @@ app:
     secret: ${JWT_SECRET}
     expiration-ms: 86400000
   oauth2:
-    redirect-uri: http://localhost:5173/login/callback
+    redirect-uri: http://localhost:3000
   upload:
     dir: ${FILE_UPLOAD_DIR:./uploads}
     max-file-size: 5242880

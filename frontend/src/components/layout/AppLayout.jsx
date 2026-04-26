@@ -3,20 +3,32 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
+
 const ROUTE_TITLES = {
-  '/dashboard': 'Overview',
-  '/resources': 'Campus Resources',
-  '/bookings': 'Facility Bookings',
-  '/tickets': 'Maintenance Support',
-  '/admin/resources': 'Resource Management',
-  '/admin/bookings': 'All Reservations',
-  '/admin/tickets': 'Maintenance Queue',
-  '/admin/users': 'User Management',
+  '/dashboard':           'Overview',
+  '/resources':           'Campus Resources',
+  '/resources/:id':       'Resource Detail',
+  '/bookings':            'Facility Bookings',
+  '/bookings/new':        'New Booking',
+  '/tickets':             'Maintenance & Support',
+  '/tickets/new':         'New Ticket',
+  '/admin/resources':     'Resource Management',
+  '/admin/bookings':      'All Reservations',
+  '/admin/tickets':       'Maintenance Queue',
+  '/admin/users':         'User Management',
+  '/technician/tickets':  'My Assigned Work',
 };
 
 export default function AppLayout() {
   const location = useLocation();
-  const currentTitle = ROUTE_TITLES[location.pathname] || 'SmartCampus';
+
+  // Match exact first, then try prefix for dynamic segments
+  const currentTitle = ROUTE_TITLES[location.pathname] 
+    || Object.entries(ROUTE_TITLES).find(([path]) => {
+        const base = path.replace(/\/:[^/]+/g, '');
+        return base !== path && location.pathname.startsWith(base + '/');
+      })?.[1]
+    || 'SmartCampus';
 
   return (
     <div className="flex h-screen overflow-hidden bg-zinc-50 font-sans">
@@ -33,6 +45,8 @@ export default function AppLayout() {
           </div>
         </main>
       </div>
+
+
     </div>
   );
 }

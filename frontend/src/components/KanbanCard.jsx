@@ -2,9 +2,9 @@ import React from 'react';
 import { MapPin, MessageSquare, Paperclip } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../utils/cn';
-import Avatar from '../ui/Avatar';
-import Tooltip from '../ui/Tooltip';
-import Badge from '../ui/Badge';
+import Avatar from './ui/Avatar';
+import Tooltip from './ui/Tooltip';
+import Badge from './ui/Badge';
 
 const PRIORITY_COLORS = {
   LOW: 'border-zinc-300',

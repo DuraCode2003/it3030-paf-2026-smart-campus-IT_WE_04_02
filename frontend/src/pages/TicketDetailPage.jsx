@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
@@ -10,27 +10,136 @@ import {
   AlertTriangle,
   ArrowLeft,
   Send,
-  MoreVertical
+  MoreVertical,
+  Wrench,
+  XCircle,
+  Settings2
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'react-hot-toast';
 import PageHeader from '../components/ui/PageHeader';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Avatar from '../components/ui/Avatar';
 import Textarea from '../components/ui/Textarea';
-import { TICKETS, CURRENT_USER } from '../data';
+import { TICKETS, USERS, ROLES } from '../data';
 import { cn } from '../utils/cn';
+import { useAuth } from '../hooks/useAuth';
+import { usePermissions } from '../hooks/usePermissions';
 
 export default function TicketDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const { canManageTicket } = usePermissions();
   const ticket = TICKETS.find(t => t.id === id);
-  const isAdmin = CURRENT_USER.role === 'ADMIN' || CURRENT_USER.role === 'TECHNICIAN';
+
+  const [status, setStatus] = useState(ticket?.status || 'OPEN');
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [assigneeId, setAssigneeId] = useState(ticket?.assignedToId || '');
 
   if (!ticket) return null;
 
+  const isAdmin = currentUser.role === ROLES.ADMIN;
+  const isTechnician = currentUser.role === ROLES.TECHNICIAN;
+  const isAssignedTechnician = isTechnician && ticket.assignedToId === currentUser.id;
+
+  const technicians = USERS.filter(u => u.role === ROLES.TECHNICIAN);
   const steps = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
   const currentStepIdx = steps.indexOf(ticket.status);
+
+  const handleSaveChanges = () => {
+    toast.success('Ticket updated successfully');
+  };
+
+  const renderActionsSidebar = () => {
+    if (isAdmin) {
+      return (
+        <div className="card p-6 space-y-6 border-brand-100 bg-brand-50/5">
+          <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
+             <Settings2 className="w-4 h-4 text-brand-600" />
+             Admin Actions
+          </h3>
+          <div className="space-y-4">
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Update Status</label>
+                <select 
+                  value={status} 
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                >
+                   {steps.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                </select>
+             </div>
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Assign Technician</label>
+                <select 
+                  value={assigneeId}
+                  onChange={(e) => setAssigneeId(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                >
+                   <option value="">Unassigned</option>
+                   {technicians.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+             </div>
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Resolution Notes</label>
+                <Textarea 
+                  placeholder="Enter notes..." 
+                  value={resolutionNotes} 
+                  onChange={(e) => setResolutionNotes(e.target.value)} 
+                />
+             </div>
+             <Button className="w-full justify-center" onClick={handleSaveChanges}>Save Changes</Button>
+             <Button variant="danger-ghost" className="w-full justify-center" icon={XCircle}>Reject Ticket</Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (isAssignedTechnician) {
+      return (
+        <div className="card p-6 space-y-6 border-violet-100 bg-violet-50/5">
+          <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
+             <Wrench className="w-4 h-4 text-violet-600" />
+             Technician Actions
+          </h3>
+          <div className="space-y-4">
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status</label>
+                <select 
+                  value={status} 
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none"
+                >
+                   <option value="OPEN">Open</option>
+                   <option value="IN_PROGRESS">In Progress</option>
+                   <option value="RESOLVED">Resolved</option>
+                </select>
+             </div>
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Resolution Notes {status === 'RESOLVED' && '*'}</label>
+                <Textarea 
+                  placeholder="Mandatory for resolution..." 
+                  value={resolutionNotes} 
+                  onChange={(e) => setResolutionNotes(e.target.value)} 
+                  required={status === 'RESOLVED'}
+                />
+             </div>
+             <Button 
+               className="w-full justify-center" 
+               onClick={handleSaveChanges}
+               disabled={status === 'RESOLVED' && !resolutionNotes}
+             >
+                Save Updates
+             </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -49,13 +158,11 @@ export default function TicketDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           <div className="space-y-4">
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">{ticket.id}</p>
             <h1 className="text-3xl font-black text-zinc-900 leading-tight">{ticket.description}</h1>
             
-            {/* Status Timeline */}
             <div className="pt-8 pb-4">
                <div className="flex items-center justify-between relative">
                   <div className="absolute top-4 left-0 right-0 h-0.5 bg-zinc-100 -translate-y-1/2" />
@@ -83,7 +190,6 @@ export default function TicketDetailPage() {
             </div>
           </div>
 
-          {/* Details Card */}
           <div className="card p-6 grid grid-cols-2 sm:grid-cols-4 gap-6">
              <div className="space-y-1">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Location</p>
@@ -121,7 +227,6 @@ export default function TicketDetailPage() {
              </div>
           </div>
 
-          {/* Activity/Comments Section */}
           <div className="space-y-6">
              <h3 className="text-lg font-black text-zinc-900 flex items-center gap-2">
                 Activity
@@ -147,9 +252,8 @@ export default function TicketDetailPage() {
                   </div>
                 ))}
                 
-                {/* Add Comment Form */}
                 <div className="flex gap-4 pt-4 border-t border-zinc-100">
-                   <Avatar name={CURRENT_USER.name} initials={CURRENT_USER.initials} size="md" />
+                   <Avatar name={currentUser.name} initials={currentUser.initials} size="md" />
                    <div className="flex-1 space-y-3">
                       <Textarea placeholder="Write a comment..." rows={3} className="bg-white border-zinc-200" />
                       <div className="flex justify-end">
@@ -161,34 +265,8 @@ export default function TicketDetailPage() {
           </div>
         </div>
 
-        {/* Sidebar Actions */}
         <div className="space-y-6">
-           {isAdmin && (
-             <div className="card p-6 space-y-6 border-brand-100 bg-brand-50/5">
-                <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest">Management Actions</h3>
-                
-                <div className="space-y-4">
-                   <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Update Status</label>
-                      <select className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none">
-                         {steps.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
-                      </select>
-                   </div>
-                   
-                   <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Assign Technician</label>
-                      <select className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none">
-                         <option value="">Unassigned</option>
-                         <option value="u4">Nimal Fernando</option>
-                         <option value="u5">Sunil Jayawardena</option>
-                      </select>
-                   </div>
-
-                   <Button className="w-full justify-center py-2.5">Save Changes</Button>
-                   <Button variant="ghost" className="w-full justify-center text-red-500 hover:bg-red-50 hover:text-red-600">Reject Ticket</Button>
-                </div>
-             </div>
-           )}
+           {renderActionsSidebar()}
 
            <div className="card p-6 space-y-4">
               <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest">Information</h3>
@@ -214,3 +292,4 @@ export default function TicketDetailPage() {
     </div>
   );
 }
+

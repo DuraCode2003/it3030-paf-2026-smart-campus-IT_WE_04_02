@@ -16,7 +16,8 @@ const STATUS_COLOR_MAP = {
   MEDIUM: 'bg-amber-100 text-amber-700 ring-amber-200',
   HIGH: 'bg-orange-100 text-orange-700 ring-orange-200',
   CRITICAL: 'bg-red-100 text-red-700 ring-red-200',
-  USER: 'bg-blue-100 text-blue-700 ring-blue-200',
+  STUDENT: 'bg-blue-100 text-blue-700 ring-blue-200',
+  LECTURER: 'bg-indigo-100 text-indigo-700 ring-indigo-200',
   ADMIN: 'bg-violet-100 text-violet-700 ring-violet-200',
   TECHNICIAN: 'bg-teal-100 text-teal-700 ring-teal-200',
 };

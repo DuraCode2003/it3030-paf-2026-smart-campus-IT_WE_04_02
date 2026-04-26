@@ -1,12 +1,7 @@
 package com.smartcampus.mapper;
 
-import com.smartcampus.dto.response.BookingResponse;
-import com.smartcampus.dto.response.ResourceResponse;
-import com.smartcampus.dto.response.UserResponse;
-import com.smartcampus.model.entity.Booking;
-import com.smartcampus.model.entity.Resource;
-import com.smartcampus.model.entity.ResourceAvailability;
-import com.smartcampus.model.entity.User;
+import com.smartcampus.dto.response.*;
+import com.smartcampus.model.entity.*;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;

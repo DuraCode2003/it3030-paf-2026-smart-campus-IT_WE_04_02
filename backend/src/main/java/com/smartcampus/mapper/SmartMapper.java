@@ -30,9 +30,10 @@ public class SmartMapper {
                 .location(resource.getLocation())
                 .description(resource.getDescription())
                 .status(resource.getStatus())
-                .availabilityWindows(resource.getAvailabilityWindows().stream()
+                .availabilityWindows(resource.getAvailabilityWindows() != null ? 
+                        resource.getAvailabilityWindows().stream()
                         .map(this::toAvailabilityResponse)
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toList()) : null)
                 .build();
     }
 
@@ -79,9 +80,9 @@ public class SmartMapper {
                 .assignedTo(toUserResponse(ticket.getAssignedTo()))
                 .rejectionReason(ticket.getRejectionReason())
                 .resolutionNotes(ticket.getResolutionNotes())
-                .attachments(ticket.getAttachments().stream()
+                .attachments(ticket.getAttachments() != null ? ticket.getAttachments().stream()
                         .map(this::toAttachmentResponse)
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toList()) : null)
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
                 .build();

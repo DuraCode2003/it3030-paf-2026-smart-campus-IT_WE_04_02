@@ -1,32 +1,28 @@
 spring:
-  application:
-    name: smart-campus
   datasource:
-    url: jdbc:h2:mem:smartcampusdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
+    url: jdbc:postgresql://localhost:5432/smart_campus_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   flyway:
     enabled: true
     locations: classpath:db/migration
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    baseline-on-migrate: true
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:YOUR_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET:YOUR_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
@@ -36,13 +32,13 @@ server:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-    expiration-ms: 86400000 # 24 hours
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000
   oauth2:
     redirect-uri: http://localhost:5173/login/callback
   upload:
-    dir: storage/uploads
-    max-file-size: 5242880 # 5MB
+    dir: ${FILE_UPLOAD_DIR:./uploads}
+    max-file-size: 5242880
     max-files-per-ticket: 3
 
 springdoc:
